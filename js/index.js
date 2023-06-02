@@ -300,14 +300,14 @@ class TodoController {
         const rowNode = e.target.parentNode.parentNode.parentNode;
         const cancelBtn = rowNode.querySelector(".cancel-btn");
         // input is required
-        // if (
-        //   contentElm.value === "" ||
-        //   startElm.value === "" ||
-        //   endElm.value === ""
-        // ) {
-        //   alert("Input Not Valid!");
-        //   return;
-        // }
+        if (
+          contentElm.value === "" ||
+          startElm.value === "" ||
+          endElm.value === ""
+        ) {
+          alert("Input Not Valid!");
+          return;
+        }
 
         const newEvent = {
           eventName: contentElm.value,
@@ -378,6 +378,7 @@ class TodoController {
         if (nodes.classList.contains("plus-btn")) {
           rowNode.remove();
         } else {
+          this.view.createTodoElm();
         }
       }
     });
