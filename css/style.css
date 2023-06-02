@@ -1,0 +1,98 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+:root {
+  --tan: #e6e2d3;
+  --trafic-white: #f0f0f0;
+  --yellow-green: #4caf50;
+  --vermillion-red: #c94c4c;
+  --blue: #008cba;
+  --edit-btn: #008dbf;
+  --delete-brn: #d74047;
+}
+button {
+  border: none;
+  outline: none;
+  cursor: pointer;
+}
+svg {
+  pointer-events: none;
+}
+.event-app {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 1.25rem;
+}
+.event-app .addBtnWrapper .addEventBtn {
+  padding: 0.75rem 1rem;
+  font-size: 0.9rem;
+  border-radius: 0.5rem;
+  background-color: var(--blue);
+  color: var(--trafic-white);
+}
+.event-app .tableWrapper {
+  width: 100%;
+}
+.event-app .tableWrapper table {
+  outline: 2px solid var(--tan);
+  padding: 1rem 1.5rem;
+  border-spacing: 0 1rem;
+}
+.event-app .tableWrapper table td {
+  padding: 1.5rem;
+}
+.event-app .tableWrapper table thead {
+  margin-bottom: 1.5rem;
+}
+.event-app .tableWrapper table thead tr th {
+  padding: 1.5rem;
+  font-size: 1.25rem;
+  font-weight: bold;
+}
+.event-app .tableWrapper table tbody tr td {
+  text-align: center;
+  background-color: var(--tan);
+}
+.event-app .tableWrapper table tbody tr td .actions {
+  display: flex;
+  gap: 0.5rem;
+}
+.event-app .tableWrapper table tbody tr td .actions button {
+  width: 45px;
+  height: 35px;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.5rem;
+}
+.event-app .tableWrapper table tbody tr td .actions button svg {
+  object-fit: contain;
+  width: 25px;
+  height: 25px;
+}
+.event-app .tableWrapper table tbody tr td .actions .edit-btn {
+  background-color: var(--edit-btn);
+}
+.event-app .tableWrapper table tbody tr td .actions .save-btn {
+  background-color: var(--edit-btn);
+}
+.event-app .tableWrapper table tbody tr td .actions .delete-btn {
+  background-color: var(--delete-brn);
+}
+.event-app .tableWrapper table tbody tr td .actions .plus-btn {
+  background-color: var(--edit-btn);
+}
+.event-app .tableWrapper table tbody tr td .actions .cancel-btn {
+  background-color: var(--delete-brn);
+}
+.event-app .tableWrapper table tbody tr input {
+  padding: 0.25rem 0.5rem;
+  border: none;
+  border-radius: 0.25rem;
+}

@@ -1,0 +1,40 @@
+<!-- 
+ * @file index.html
+ * @author: Pengcheng Xu
+ * @modifed : 06/02/2023
+ * @version 1.0.0
+ * This is for SEP Eval Project. Where we build an event list interacting with a local json server.
+ -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="css/style.css" />
+    <title>EvalProj</title>
+  </head>
+  <body>
+    <main class="event-app">
+      <div class="addBtnWrapper">
+        <button class="addEventBtn">Add New Event</button>
+      </div>
+      <div class="tableWrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Event</th>
+              <th>Start</th>
+              <th>End</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody class="event-app__show"></tbody>
+        </table>
+      </div>
+    </main>
+
+    <!-- import js file -->
+    <script src="js/index.js"></script>
+  </body>
+</html>
