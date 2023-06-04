@@ -88,14 +88,11 @@ class TodoModel {
     this.#todos = this.#todos.filter((t) => t.id != id);
   }
 
-  async updateTodo(id, updatedTodo) {
-    let todo = this.findTodo(id);
-
-    // console.log("key:", key);
-    // console.log("val:", val);
+  async updateTodo(updatedTodo) {
+    let todo = this.findTodo(updatedTodo.id);
     todo = updatedTodo;
-    todo.id = id;
-    return await serverApi.putData(todo);
+
+    return await serverApi.putData(updatedTodo);
   }
 
   findTodo(id) {
@@ -115,79 +112,16 @@ class TodoView {
     this.addBtn = document.querySelector(
       ".event-app .addBtnWrapper .addEventBtn"
     );
-
-    this.form = document.querySelector(
-      ".app-container .app-container__create-todo .app-container__form"
-    );
-    this.filter = document.querySelector(
-      ".app-container .app-container__show-todos header select"
-    );
     this.eventsContainer = document.querySelector("tbody");
   }
   appendTodo(todo) {
-    const todoElm = this.createTodoElm(todo);
+    const todoElm = this.createTodoShowElm(todo);
     this.eventsContainer.appendChild(todoElm);
   }
 
-  createTodoElm(todo) {
-    // console.log(todo);
-    const todoElm = document.createElement("tr");
-    todoElm.classList.add("event-item");
-    todoElm.setAttribute("id", `item-${todo.id}`);
-    todoElm.innerHTML = `
-    <td>${todo.eventName}</td>
-    <td>${todo.startDate}</td>
-    <td>${todo.endDate}</td>
-    <td>
-      <div class="actions">
-        <button class="edit-btn" edit-id=${todo.id} >
-          <svg
-            focusable="false"
-            aria-hidden="true"
-            viewBox="0 0 24 24"
-            data-testid="EditIcon"
-            aria-label="fontSize small"
-          >
-            <path fill="white"
-              d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34a.9959.9959 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"
-            ></path>
-          </svg>
-        </button>
-        <button class="delete-btn" delete-id=${todo.id}>
-          <svg
-            focusable="false"
-            aria-hidden="true"
-            viewBox="0 0 24 24"
-            data-testid="DeleteIcon"
-            aria-label="fontSize small"
-          >
-            <path fill="white"
-              d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"
-            ></path>
-          </svg>
-        </button>
-        <button class="save-btn" style="display: none" save-id=${todo.id}> <svg focusable="false" aria-hidden="true" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path fill="white" d="M21,20V8.414a1,1,0,0,0-.293-.707L16.293,3.293A1,1,0,0,0,15.586,3H4A1,1,0,0,0,3,4V20a1,1,0,0,0,1,1H20A1,1,0,0,0,21,20ZM9,8h4a1,1,0,0,1,0,2H9A1,1,0,0,1,9,8Zm7,11H8V15a1,1,0,0,1,1-1h6a1,1,0,0,1,1,1Z"/></svg></button>
-        <button class="plus-btn" style="display: none" plus-id=${todo.id}><svg focusable viewBox="0 0 24 24" aria-hidden="true xmlns="http://www.w3.org/2000/svg"><path fill="white" d="M12 6V18M18 12H6" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-        <button class="cancel-btn" style="display: none" cancel-id=${todo.id}>
-          <svg focusable="false" aria-hidden="true" viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg"><path fill="white" d="M19.587 16.001l6.096 6.096c0.396 0.396 0.396 1.039 0 1.435l-2.151 2.151c-0.396 0.396-1.038 0.396-1.435 0l-6.097-6.096-6.097 6.096c-0.396 0.396-1.038 0.396-1.434 0l-2.152-2.151c-0.396-0.396-0.396-1.038 0-1.435l6.097-6.096-6.097-6.097c-0.396-0.396-0.396-1.039 0-1.435l2.153-2.151c0.396-0.396 1.038-0.396 1.434 0l6.096 6.097 6.097-6.097c0.396-0.396 1.038-0.396 1.435 0l2.151 2.152c0.396 0.396 0.396 1.038 0 1.435l-6.096 6.096z"></path></svg>
-        </button>
-      </div>
-    </td>
-          `;
-    return todoElm;
-  }
-  deleteTodoElm(id) {
-    const elem = document.querySelector(`#item-${id}`);
-    elem.remove();
-  }
-
-  appendNewEventModifiable() {
-    const addEventElm = this.createNewEventModifiableEle();
-    this.eventsContainer.appendChild(addEventElm);
-  }
-  createNewEventModifiableEle() {
+  createInitalTodoAddElm() {
     const eventElm = document.createElement("tr");
-    eventElm.classList.add("create-row");
+    eventElm.classList.add("create-row", "initalAdd");
 
     eventElm.innerHTML = `
     <td>
@@ -235,11 +169,115 @@ class TodoView {
     // console.log(eventElm);
     return eventElm;
   }
+  createChangableTodoElm(todo) {
+    const eventElm = document.createElement("tr");
+    eventElm.classList.add("create-row");
+    eventElm.setAttribute("id", `change-${todo.id}`);
+
+    eventElm.innerHTML = `
+    <td>
+                <input type="text" name="content" id="content" value='${todo.eventName}' required/>
+              </td>
+              <td><input type="date" name="startDate" id="startDate" value=${todo.startDate} required /></td>
+              <td><input type="date" name="endDate" id="endDate" value=${todo.endDate} required /></td>
+              <td>
+                <div class="actions">
+                  <button class="edit-btn" style="display: none" edit-id=${todo.id}>
+                    <svg
+                      focusable="false"
+                      aria-hidden="true"
+                      viewBox="0 0 24 24"
+                      data-testid="EditIcon"
+                      aria-label="fontSize small"
+                    >
+                      <path fill="white"
+                        d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34a.9959.9959 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"
+                      ></path>
+                    </svg>
+                  </button>
+                  <button class="delete-btn" style="display: none" delete-id=${todo.id}>
+                    <svg
+                      focusable="false"
+                      aria-hidden="true"
+                      viewBox="0 0 24 24"
+                      data-testid="DeleteIcon"
+                      aria-label="fontSize small"
+                    >
+                      <path fill="white"
+                        d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"
+                      ></path>
+                    </svg>
+                  </button>
+                  <button class="save-btn" save-id=${todo.id}> <svg focusable="false" aria-hidden="true" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path fill="white" d="M21,20V8.414a1,1,0,0,0-.293-.707L16.293,3.293A1,1,0,0,0,15.586,3H4A1,1,0,0,0,3,4V20a1,1,0,0,0,1,1H20A1,1,0,0,0,21,20ZM9,8h4a1,1,0,0,1,0,2H9A1,1,0,0,1,9,8Zm7,11H8V15a1,1,0,0,1,1-1h6a1,1,0,0,1,1,1Z"/></svg></button>
+                  <button class="plus-btn" style="display: none" plus-id=${todo.id} ><svg focusable viewBox="0 0 24 24" aria-hidden="true xmlns="http://www.w3.org/2000/svg"><path fill="white" d="M12 6V18M18 12H6" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+                  <button class="cancel-btn" cancel-id=${todo.id}>
+                    <svg focusable="false" aria-hidden="true" viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg"><path fill="white" d="M19.587 16.001l6.096 6.096c0.396 0.396 0.396 1.039 0 1.435l-2.151 2.151c-0.396 0.396-1.038 0.396-1.435 0l-6.097-6.096-6.097 6.096c-0.396 0.396-1.038 0.396-1.434 0l-2.152-2.151c-0.396-0.396-0.396-1.038 0-1.435l6.097-6.096-6.097-6.097c-0.396-0.396-0.396-1.039 0-1.435l2.153-2.151c0.396-0.396 1.038-0.396 1.434 0l6.096 6.097 6.097-6.097c0.396-0.396 1.038-0.396 1.435 0l2.151 2.152c0.396 0.396 0.396 1.038 0 1.435l-6.096 6.096z"></path></svg>
+                  </button>
+                </div>
+              </td>
+    `;
+
+    // console.log(eventElm);
+    return eventElm;
+  }
+
+  createTodoShowElm(todo) {
+    // console.log(todo);
+    const todoElm = document.createElement("tr");
+    todoElm.classList.add("event-item");
+    todoElm.setAttribute("id", `show-${todo.id}`);
+    todoElm.innerHTML = `
+    <td>${todo.eventName}</td>
+    <td>${todo.startDate}</td>
+    <td>${todo.endDate}</td>
+    <td>
+      <div class="actions">
+        <button class="edit-btn" edit-id=${todo.id} >
+          <svg
+            focusable="false"
+            aria-hidden="true"
+            viewBox="0 0 24 24"
+            data-testid="EditIcon"
+            aria-label="fontSize small"
+          >
+            <path fill="white"
+              d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34a.9959.9959 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"
+            ></path>
+          </svg>
+        </button>
+        <button class="delete-btn" delete-id=${todo.id}>
+          <svg
+            focusable="false"
+            aria-hidden="true"
+            viewBox="0 0 24 24"
+            data-testid="DeleteIcon"
+            aria-label="fontSize small"
+          >
+            <path fill="white"
+              d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"
+            ></path>
+          </svg>
+        </button>
+        <button class="save-btn" style="display: none" save-id=${todo.id}> <svg focusable="false" aria-hidden="true" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path fill="white" d="M21,20V8.414a1,1,0,0,0-.293-.707L16.293,3.293A1,1,0,0,0,15.586,3H4A1,1,0,0,0,3,4V20a1,1,0,0,0,1,1H20A1,1,0,0,0,21,20ZM9,8h4a1,1,0,0,1,0,2H9A1,1,0,0,1,9,8Zm7,11H8V15a1,1,0,0,1,1-1h6a1,1,0,0,1,1,1Z"/></svg></button>
+        <button class="plus-btn" style="display: none" plus-id=${todo.id}><svg focusable viewBox="0 0 24 24" aria-hidden="true xmlns="http://www.w3.org/2000/svg"><path fill="white" d="M12 6V18M18 12H6" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <button class="cancel-btn" style="display: none" cancel-id=${todo.id}>
+          <svg focusable="false" aria-hidden="true" viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg"><path fill="white" d="M19.587 16.001l6.096 6.096c0.396 0.396 0.396 1.039 0 1.435l-2.151 2.151c-0.396 0.396-1.038 0.396-1.435 0l-6.097-6.096-6.097 6.096c-0.396 0.396-1.038 0.396-1.434 0l-2.152-2.151c-0.396-0.396-0.396-1.038 0-1.435l6.097-6.096-6.097-6.097c-0.396-0.396-0.396-1.039 0-1.435l2.153-2.151c0.396-0.396 1.038-0.396 1.434 0l6.096 6.097 6.097-6.097c0.396-0.396 1.038-0.396 1.435 0l2.151 2.152c0.396 0.396 0.396 1.038 0 1.435l-6.096 6.096z"></path></svg>
+        </button>
+      </div>
+    </td>
+          `;
+    return todoElm;
+  }
+
+  deleteTodoElm(id) {
+    const elem = document.querySelector(`#show-${id}`);
+    elem.remove();
+  }
 
   initialRender(todos) {
     // console.log(this.eventsContainer);
     todos.forEach((todo) => {
-      const todoElm = this.createTodoElm(todo);
+      const todoElm = this.createTodoShowElm(todo);
       this.eventsContainer.appendChild(todoElm);
     });
   }
@@ -261,7 +299,6 @@ class TodoController {
     this.view.initialRender(this.model.getTodos());
     // initialize event handlers
     await this.setEventHandlers();
-    // this.model.findTodo(4);
   }
 
   async setEventHandlers() {
@@ -272,19 +309,17 @@ class TodoController {
   }
 
   setAddBtn() {
+    // okay
     this.view.addBtn.addEventListener("click", (e) => {
       // console.log("click");
-      this.view.appendNewEventModifiable();
+      const initialAddElm = this.view.createInitalTodoAddElm();
+      this.view.eventsContainer.appendChild(initialAddElm);
     });
   }
 
   setBtnsInShowList() {
     // plusBtn
     this.view.eventsContainer.addEventListener("click", (e) => {
-      // console.log(e.target);
-      // console.log(e.target.classList);
-      const addEvenElm = e.target.parentNode.parentNode.parentNode;
-      let toDoId = 0;
       const isDeleteBtn = e.target.classList.contains("delete-btn");
       const isEditBtn = e.target.classList.contains("edit-btn");
       const isPlusBtn = e.target.classList.contains("plus-btn");
@@ -292,13 +327,16 @@ class TodoController {
       const isSaveBtn = e.target.classList.contains("save-btn");
 
       if (isPlusBtn) {
-        // console.log(cancelBtn);
+        // ok
 
-        const contentElm = addEvenElm.querySelector("#content");
-        const startElm = addEvenElm.querySelector("#startDate");
-        const endElm = addEvenElm.querySelector("#endDate");
-        const rowNode = e.target.parentNode.parentNode.parentNode;
-        const cancelBtn = rowNode.querySelector(".cancel-btn");
+        // console.log(cancelBtn);
+        const initialTodoAddElm = e.target.parentNode.parentNode.parentNode;
+        console.log(initialTodoAddElm);
+
+        const contentElm = initialTodoAddElm.querySelector("#content");
+        const startElm = initialTodoAddElm.querySelector("#startDate");
+        const endElm = initialTodoAddElm.querySelector("#endDate");
+
         // input is required
         if (
           contentElm.value === "" ||
@@ -320,6 +358,7 @@ class TodoController {
           this.view.appendTodo(newEvent);
         });
       } else if (isDeleteBtn) {
+        // okay
         // console.log(e.target);
         const id = e.target.getAttribute("delete-id");
 
@@ -328,57 +367,50 @@ class TodoController {
           this.view.deleteTodoElm(id);
         });
       } else if (isEditBtn) {
+        // okay
         // console.log("edit");
+        const todoShowElm = e.target.parentNode.parentNode.parentNode;
         const id = e.target.getAttribute("edit-id");
-        console.log(id);
-        toDoId = id;
-        console.log(toDoId);
         const todo = this.model.findTodo(id);
         // console.log(todo);
-        const newEle = this.view.createNewEventModifiableEle();
-        // console.log(newEle);
-        const content = newEle.querySelector("input");
-        const startDate = newEle.querySelector("#startDate");
-        const endDate = newEle.querySelector("#endDate");
-        const plusBtn = newEle.querySelector(".plus-btn");
-        const saveBtn = newEle.querySelector(".save-btn");
-        plusBtn.style.display = "none";
-        saveBtn.style.display = "flex";
-
-        content.value = todo.eventName;
-        startDate.value = todo.startDate;
-        endDate.value = todo.endDate;
-        this.view.eventsContainer.insertBefore(newEle, addEvenElm);
-        addEvenElm.remove();
-        saveBtn.addEventListener("click", () => {
-          console.log("save");
-          console.log(id);
-          const contentElm = newEle.querySelector("#content");
-          const startElm = newEle.querySelector("#startDate");
-          const endElm = newEle.querySelector("#endDate");
-
-          console.log(contentElm);
-
-          const updatedTodo = {
-            eventName: contentElm.value,
-            startDate: startElm.value,
-            endDate: endElm.value,
-          };
-          this.model.updateTodo(id, updatedTodo);
-          const doDoElm = this.view.createTodoElm(updatedTodo);
-          this.view.eventsContainer.insertBefore(
-            doDoElm,
-            saveBtn.parentNode.parentNode.parentNode
-          );
-          saveBtn.parentNode.parentNode.parentNode.remove();
-        });
+        const changableEle = this.view.createChangableTodoElm(todo);
+        // console.log(changableEle);
+        this.view.eventsContainer.insertBefore(changableEle, todoShowElm);
+        todoShowElm.style.display = "none";
+      } else if (isSaveBtn) {
+        const changableElm = e.target.parentNode.parentNode.parentNode;
+        // okay
+        const id = e.target.getAttribute("save-id");
+        console.log(id);
+        const changableEle = e.target.parentNode.parentNode.parentNode;
+        const contentElm = changableEle.querySelector("#content");
+        const startElm = changableEle.querySelector("#startDate");
+        const endElm = changableEle.querySelector("#endDate");
+        const updatedTodo = {
+          eventName: contentElm.value,
+          startDate: startElm.value,
+          endDate: endElm.value,
+          id: id,
+        };
+        this.model.updateTodo(updatedTodo);
+        const showElm = this.view.createTodoShowElm(updatedTodo);
+        this.view.eventsContainer.insertBefore(showElm, changableEle);
+        changableEle.remove();
       } else if (isCancelBtn) {
-        const rowNode = e.target.parentNode.parentNode.parentNode;
-        const nodes = e.target.parentNode.children[3];
-        if (nodes.classList.contains("plus-btn")) {
-          rowNode.remove();
+        const changableElm = e.target.parentNode.parentNode.parentNode;
+        if (changableElm.classList.contains("initalAdd")) {
+          // initial Add
+          changableElm.remove();
         } else {
-          this.view.createTodoElm();
+          // discard editing
+          const id = e.target.getAttribute("cancel-id");
+          console.log(id);
+          const hiddenShowElm = this.view.eventsContainer.querySelector(
+            `#show-${id}`
+          );
+          console.log(hiddenShowElm);
+          hiddenShowElm.style.display = "table-row";
+          changableElm.remove();
         }
       }
     });
