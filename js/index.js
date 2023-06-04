@@ -354,8 +354,13 @@ class TodoController {
         };
 
         this.model.addNewTodo(newEvent).then((todo) => {
-          e.target.parentNode.parentNode.parentNode.remove();
-          this.view.appendTodo(newEvent);
+          const initalChangableElm = e.target.parentNode.parentNode.parentNode;
+          const todoShowElm = this.view.createTodoShowElm(todo);
+          this.view.eventsContainer.insertBefore(
+            todoShowElm,
+            initalChangableElm
+          );
+          initalChangableElm.remove();
         });
       } else if (isDeleteBtn) {
         // okay
@@ -398,20 +403,17 @@ class TodoController {
         changableEle.remove();
       } else if (isCancelBtn) {
         const changableElm = e.target.parentNode.parentNode.parentNode;
-        if (changableElm.classList.contains("initalAdd")) {
-          // initial Add
-          changableElm.remove();
-        } else {
-          // discard editing
+        if (!changableElm.classList.contains("initalAdd")) {
+          // if the row is not intial add elm
           const id = e.target.getAttribute("cancel-id");
-          console.log(id);
+          // console.log(id);
           const hiddenShowElm = this.view.eventsContainer.querySelector(
             `#show-${id}`
           );
-          console.log(hiddenShowElm);
+          // console.log(hiddenShowElm);
           hiddenShowElm.style.display = "table-row";
-          changableElm.remove();
         }
+        changableElm.remove();
       }
     });
   }
