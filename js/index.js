@@ -43,6 +43,7 @@ const serverApi = (function () {
       body: JSON.stringify(todo),
     });
     const data = await resp.json();
+    console.log("data:", data);
     return data;
   }
 
@@ -90,7 +91,9 @@ class TodoModel {
 
   async updateTodo(updatedTodo) {
     let todo = this.findTodo(updatedTodo.id);
-    todo = updatedTodo;
+    todo.eventName = updatedTodo.eventName;
+    todo.startDate = updatedTodo.startDate;
+    todo.endDate = updatedTodo.endDate;
 
     return await serverApi.putData(updatedTodo);
   }
@@ -294,7 +297,6 @@ class TodoController {
   async init() {
     // initialize model
     await this.model.fetchTodos();
-    // console.log(this.model.getTodos());
     // initialize view
     this.view.initialRender(this.model.getTodos());
     // initialize event handlers
@@ -328,94 +330,101 @@ class TodoController {
 
       if (isPlusBtn) {
         // ok
-
-        // console.log(cancelBtn);
         const initialTodoAddElm = e.target.parentNode.parentNode.parentNode;
-        console.log(initialTodoAddElm);
-
-        const contentElm = initialTodoAddElm.querySelector("#content");
-        const startElm = initialTodoAddElm.querySelector("#startDate");
-        const endElm = initialTodoAddElm.querySelector("#endDate");
-
-        // input is required
-        if (
-          contentElm.value === "" ||
-          startElm.value === "" ||
-          endElm.value === ""
-        ) {
-          alert("Input Not Valid!");
-          return;
-        }
-
-        const newEvent = {
-          eventName: contentElm.value,
-          startDate: startElm.value,
-          endDate: endElm.value,
-        };
-
-        this.model.addNewTodo(newEvent).then((todo) => {
-          const initalChangableElm = e.target.parentNode.parentNode.parentNode;
-          const todoShowElm = this.view.createTodoShowElm(todo);
-          this.view.eventsContainer.insertBefore(
-            todoShowElm,
-            initalChangableElm
-          );
-          initalChangableElm.remove();
-        });
+        this.setUpPlusBtn(initialTodoAddElm);
       } else if (isDeleteBtn) {
         // okay
-        // console.log(e.target);
         const id = e.target.getAttribute("delete-id");
-
-        // console.log(id);
-        this.model.deleteTodo(id).then(() => {
-          this.view.deleteTodoElm(id);
-        });
+        this.setUpDeleteBtn(id);
       } else if (isEditBtn) {
         // okay
-        // console.log("edit");
         const todoShowElm = e.target.parentNode.parentNode.parentNode;
         const id = e.target.getAttribute("edit-id");
-        const todo = this.model.findTodo(id);
-        // console.log(todo);
-        const changableEle = this.view.createChangableTodoElm(todo);
-        // console.log(changableEle);
-        this.view.eventsContainer.insertBefore(changableEle, todoShowElm);
-        todoShowElm.style.display = "none";
+        this.setUpEditBtn(id, todoShowElm);
       } else if (isSaveBtn) {
-        const changableElm = e.target.parentNode.parentNode.parentNode;
-        // okay
         const id = e.target.getAttribute("save-id");
-        console.log(id);
         const changableEle = e.target.parentNode.parentNode.parentNode;
-        const contentElm = changableEle.querySelector("#content");
-        const startElm = changableEle.querySelector("#startDate");
-        const endElm = changableEle.querySelector("#endDate");
-        const updatedTodo = {
-          eventName: contentElm.value,
-          startDate: startElm.value,
-          endDate: endElm.value,
-          id: id,
-        };
-        this.model.updateTodo(updatedTodo);
-        const showElm = this.view.createTodoShowElm(updatedTodo);
-        this.view.eventsContainer.insertBefore(showElm, changableEle);
-        changableEle.remove();
+        this.setUpSaveBtn(id, changableEle);
       } else if (isCancelBtn) {
         const changableElm = e.target.parentNode.parentNode.parentNode;
-        if (!changableElm.classList.contains("initalAdd")) {
-          // if the row is not intial add elm
-          const id = e.target.getAttribute("cancel-id");
-          // console.log(id);
-          const hiddenShowElm = this.view.eventsContainer.querySelector(
-            `#show-${id}`
-          );
-          // console.log(hiddenShowElm);
-          hiddenShowElm.style.display = "table-row";
-        }
-        changableElm.remove();
+        this.setUpCancelBtn(changableElm, e);
       }
     });
+  }
+
+  setUpPlusBtn(initialTodoAddElm) {
+    const contentElm = initialTodoAddElm.querySelector("#content");
+    const startElm = initialTodoAddElm.querySelector("#startDate");
+    const endElm = initialTodoAddElm.querySelector("#endDate");
+
+    // input is required
+    if (
+      contentElm.value === "" ||
+      startElm.value === "" ||
+      endElm.value === ""
+    ) {
+      alert("Input Not Valid!");
+      return;
+    }
+
+    const newEvent = {
+      eventName: contentElm.value,
+      startDate: startElm.value,
+      endDate: endElm.value,
+    };
+
+    this.model.addNewTodo(newEvent).then((todo) => {
+      const todoShowElm = this.view.createTodoShowElm(todo);
+      this.view.eventsContainer.insertBefore(todoShowElm, initialTodoAddElm);
+      initialTodoAddElm.remove();
+    });
+  }
+
+  setUpDeleteBtn(id) {
+    this.model.deleteTodo(id).then(() => {
+      this.view.deleteTodoElm(id);
+    });
+  }
+
+  setUpEditBtn(id, todoShowElm) {
+    const todo = this.model.findTodo(id);
+    const changableEle = this.view.createChangableTodoElm(todo);
+    this.view.eventsContainer.insertBefore(changableEle, todoShowElm);
+    todoShowElm.style.display = "none";
+  }
+
+  setUpSaveBtn(id, changableEle) {
+    const hiddenElm = this.view.eventsContainer.querySelector(`#show-${id}`);
+    hiddenElm.remove();
+
+    const contentElm = changableEle.querySelector("#content");
+    const startElm = changableEle.querySelector("#startDate");
+    const endElm = changableEle.querySelector("#endDate");
+    const updatedTodo = {
+      eventName: contentElm.value,
+      startDate: startElm.value,
+      endDate: endElm.value,
+      id: id,
+    };
+    this.model.updateTodo(updatedTodo).then((updatedTodo) => {
+      const showElm = this.view.createTodoShowElm(updatedTodo);
+      this.view.eventsContainer.insertBefore(showElm, changableEle);
+      changableEle.remove();
+    });
+  }
+
+  setUpCancelBtn(changableElm, e) {
+    if (!changableElm.classList.contains("initalAdd")) {
+      // if the row is not intial add elm
+      const id = e.target.getAttribute("cancel-id");
+      // console.log(id);
+      const hiddenShowElm = this.view.eventsContainer.querySelector(
+        `#show-${id}`
+      );
+      // console.log(hiddenShowElm);
+      hiddenShowElm.style.display = "table-row";
+    }
+    changableElm.remove();
   }
 }
 
